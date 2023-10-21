@@ -30,7 +30,17 @@ printf "\n\n"
 start_time=$(date +%s)
 
 # File run
-python LebwohlLasher.py 50 50 0.5 0
+#python LebwohlLasher.py 50 50 0.5 0
+python -m cProfile LebwohlLasher.py 50 50 0.5 0 > prof1.txt
+python -m cProfile LebwohlLasher.py 50 50 0.5 0 > prof2.txt
+python -m cProfile LebwohlLasher.py 50 50 0.5 0 > prof3.txt
+python -m cProfile LebwohlLasher.py 50 50 0.5 0 > prof4.txt
+python -m cProfile LebwohlLasher.py 50 50 0.5 0 > prof5.txt
+python -m cProfile LebwohlLasher.py 50 50 0.5 0 > prof6.txt
+python -m cProfile LebwohlLasher.py 50 50 0.5 0 > prof7.txt
+python -m cProfile LebwohlLasher.py 50 50 0.5 0 > prof8.txt
+python -m cProfile LebwohlLasher.py 50 50 0.5 0 > prof9.txt
+python -m cProfile LebwohlLasher.py 50 50 0.5 0 > prof10.txt
 
 # End recording the end time
 end_time=$(date +%s)
