@@ -28,6 +28,7 @@ import datetime
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
+from numba import jit
 
 #=======================================================================
 def initdat(nmax):
@@ -129,6 +130,7 @@ def savedat(arr,nsteps,Ts,runtime,ratio,energy,order,nmax):
     FileOut.close()
 #=======================================================================
 
+@jit(nopython=True)
 def one_energy(arr,ix,iy,nmax):
     """
     Arguments:
@@ -163,6 +165,8 @@ def one_energy(arr,ix,iy,nmax):
     en += 0.5*(1.0 - 3.0*np.cos(ang)**2)
     return en
 #=======================================================================
+
+@jit(nopython=True)
 def all_energy(arr,nmax):
     """
     Arguments:
@@ -180,6 +184,8 @@ def all_energy(arr,nmax):
             enall += one_energy(arr,i,j,nmax)
     return enall
 #=======================================================================
+
+@jit(nopython=True)
 def get_order(arr,nmax):
     """
     Arguments:
@@ -208,6 +214,8 @@ def get_order(arr,nmax):
     eigenvalues,eigenvectors = np.linalg.eig(Qab)
     return eigenvalues.max()
 #=======================================================================
+
+@jit(nopython=True)
 def MC_step(arr,Ts,nmax):
     """
     Arguments:
