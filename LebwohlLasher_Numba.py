@@ -215,7 +215,7 @@ def get_order(arr,nmax):
     return eigenvalues.max()
 #=======================================================================
 
-# @jit(nopython=True)
+@jit(nopython=True)
 def MC_step(arr,Ts,nmax,aran):
     """
     Arguments:
