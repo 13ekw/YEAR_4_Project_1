@@ -180,7 +180,7 @@ def all_energy(arr,nmax):
     """
     enall = 0.0
     for i in prange(nmax):
-        for j in range(nmax):
+        for j in prange(nmax):
             enall += one_energy(arr,i,j,nmax)
     return enall
 #=======================================================================
@@ -215,7 +215,7 @@ def get_order(arr,nmax):
     return eigenvalues.max()
 #=======================================================================
 
-# @jit(nopython=True, cache = True, parallel = True)
+@jit(nopython=True, cache = True, parallel = True)
 def MC_step(arr,Ts,nmax,aran):
     """
     Arguments:
