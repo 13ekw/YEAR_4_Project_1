@@ -21,18 +21,18 @@ domains alternate between old data and new data.
 
 SH 16-Oct-23
 """
-
+import cython
 import sys
 import time
 import datetime
 import numpy as np
+cimport numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-import cython
-from libc.math cimport sin, cos
+from libc.math cimport sin, cos, pi, exp
 
 #=======================================================================
-def initdat(nmax):
+cdef np.ndarray initdat(int nmax):
     """
     Arguments:
       nmax (int) = size of lattice to create (nmax,nmax).
@@ -43,7 +43,7 @@ def initdat(nmax):
 	Returns:
 	  arr (float(nmax,nmax)) = array to hold lattice.
     """
-    arr = np.random.random_sample((nmax,nmax))*2.0*np.pi
+    cdef np.ndarray[double, ndim=2] arr = np.random.random_sample((nmax,nmax))*2.0*np.pi
     return arr
 #=======================================================================
 def plotdat(arr,pflag,nmax):
@@ -67,8 +67,8 @@ def plotdat(arr,pflag,nmax):
     """
     if pflag==0:
         return
-    cdef float u = cos(arr)
-    cdef float v = sin(arr)
+    u = np.cos(arr)
+    v = np.sin(arr)
     x = np.arange(nmax)
     y = np.arange(nmax)
     cols = np.zeros((nmax,nmax))
@@ -93,44 +93,44 @@ def plotdat(arr,pflag,nmax):
     ax.set_aspect('equal')
     plt.show()
 #=======================================================================
-def savedat(arr,nsteps,Ts,runtime,ratio,energy,order,nmax):
-    """
-    Arguments:
-	  arr (float(nmax,nmax)) = array that contains lattice data;
-	  nsteps (int) = number of Monte Carlo steps (MCS) performed;
-	  Ts (float) = reduced temperature (range 0 to 2);
-	  ratio (float(nsteps)) = array of acceptance ratios per MCS;
-	  energy (float(nsteps)) = array of reduced energies per MCS;
-	  order (float(nsteps)) = array of order parameters per MCS;
-      nmax (int) = side length of square lattice to simulated.
-    Description:
-      Function to save the energy, order and acceptance ratio
-      per Monte Carlo step to text file.  Also saves run data in the
-      header.  Filenames are generated automatically based on
-      date and time at beginning of execution.
-	Returns:
-	  NULL
-    """
-    # Create filename based on current date and time.
-    current_datetime = datetime.datetime.now().strftime("%a-%d-%b-%Y-at-%I-%M-%S%p")
-    filename = "LL-Output-{:s}.txt".format(current_datetime)
-    FileOut = open(filename,"w")
-    # Write a header with run parameters
-    print("#=====================================================",file=FileOut)
-    print("# File created:        {:s}".format(current_datetime),file=FileOut)
-    print("# Size of lattice:     {:d}x{:d}".format(nmax,nmax),file=FileOut)
-    print("# Number of MC steps:  {:d}".format(nsteps),file=FileOut)
-    print("# Reduced temperature: {:5.3f}".format(Ts),file=FileOut)
-    print("# Run time (s):        {:8.6f}".format(runtime),file=FileOut)
-    print("#=====================================================",file=FileOut)
-    print("# MC step:  Ratio:     Energy:   Order:",file=FileOut)
-    print("#=====================================================",file=FileOut)
-    # Write the columns of data
-    for i in range(nsteps+1):
-        print("   {:05d}    {:6.4f} {:12.4f}  {:6.4f} ".format(i,ratio[i],energy[i],order[i]),file=FileOut)
-    FileOut.close()
+# def savedat(arr,nsteps,Ts,runtime,ratio,energy,order,nmax):
+#     """
+#     Arguments:
+# 	  arr (float(nmax,nmax)) = array that contains lattice data;
+# 	  nsteps (int) = number of Monte Carlo steps (MCS) performed;
+# 	  Ts (float) = reduced temperature (range 0 to 2);
+# 	  ratio (float(nsteps)) = array of acceptance ratios per MCS;
+# 	  energy (float(nsteps)) = array of reduced energies per MCS;
+# 	  order (float(nsteps)) = array of order parameters per MCS;
+#       nmax (int) = side length of square lattice to simulated.
+#     Description:
+#       Function to save the energy, order and acceptance ratio
+#       per Monte Carlo step to text file.  Also saves run data in the
+#       header.  Filenames are generated automatically based on
+#       date and time at beginning of execution.
+# 	Returns:
+# 	  NULL
+#     """
+#     # Create filename based on current date and time.
+#     current_datetime = datetime.datetime.now().strftime("%a-%d-%b-%Y-at-%I-%M-%S%p")
+#     filename = "LL-Output-{:s}.txt".format(current_datetime)
+#     FileOut = open(filename,"w")
+#     # Write a header with run parameters
+#     print("#=====================================================",file=FileOut)
+#     print("# File created:        {:s}".format(current_datetime),file=FileOut)
+#     print("# Size of lattice:     {:d}x{:d}".format(nmax,nmax),file=FileOut)
+#     print("# Number of MC steps:  {:d}".format(nsteps),file=FileOut)
+#     print("# Reduced temperature: {:5.3f}".format(Ts),file=FileOut)
+#     print("# Run time (s):        {:8.6f}".format(runtime),file=FileOut)
+#     print("#=====================================================",file=FileOut)
+#     print("# MC step:  Ratio:     Energy:   Order:",file=FileOut)
+#     print("#=====================================================",file=FileOut)
+#     # Write the columns of data
+#     for i in range(nsteps+1):
+#         print("   {:05d}    {:6.4f} {:12.4f}  {:6.4f} ".format(i,ratio[i],energy[i],order[i]),file=FileOut)
+#     FileOut.close()
 #=======================================================================
-cdef float one_energy(arr,ix,iy,nmax):
+def one_energy(arr,ix,iy,nmax):
     """
     Arguments:
 	  arr (float(nmax,nmax)) = array that contains lattice data;
@@ -145,7 +145,7 @@ cdef float one_energy(arr,ix,iy,nmax):
 	Returns:
 	  en (float) = reduced energy of cell.
     """
-    cdef float en = 0.0
+    en = 0.0
     ixp = (ix+1)%nmax # These are the coordinates
     ixm = (ix-1)%nmax # of the neighbours
     iyp = (iy+1)%nmax # with wraparound
@@ -164,7 +164,7 @@ cdef float one_energy(arr,ix,iy,nmax):
     en += 0.5*(1.0 - 3.0*np.cos(ang)**2)
     return en
 #=======================================================================
-cdef float all_energy(arr,nmax):
+def all_energy(arr,nmax):
     """
     Arguments:
 	  arr (float(nmax,nmax)) = array that contains lattice data;
@@ -175,7 +175,7 @@ cdef float all_energy(arr,nmax):
 	Returns:
 	  enall (float) = reduced energy of lattice.
     """
-    cdef float enall = 0.0
+    enall = 0.0
     for i in range(nmax):
         for j in range(nmax):
             enall += one_energy(arr,i,j,nmax)
@@ -199,7 +199,7 @@ def get_order(arr,nmax):
     # Generate a 3D unit vector for each cell (i,j) and
     # put it in a (3,i,j) array.
     #
-    lab = np.vstack((cos(arr),sin(arr),np.zeros_like(arr))).reshape(3,nmax,nmax)
+    lab = np.vstack((np.cos(arr),np.sin(arr),np.zeros_like(arr))).reshape(3,nmax,nmax)
     for a in range(3):
         for b in range(3):
             for i in range(nmax):
@@ -230,8 +230,8 @@ def MC_step(arr,Ts,nmax):
     # using lots of individual calls.  "scale" sets the width
     # of the distribution for the angle changes - increases
     # with temperature.
-    cdef float scale=0.1+Ts
-    cdef int accept = 0
+    scale=0.1+Ts
+    accept = 0
     xran = np.random.randint(0,high=nmax, size=(nmax,nmax))
     yran = np.random.randint(0,high=nmax, size=(nmax,nmax))
     aran = np.random.normal(scale=scale, size=(nmax,nmax))
@@ -294,7 +294,7 @@ def main(program, nsteps, nmax, temp, pflag):
     # Final outputs
     print("{}: Size: {:d}, Steps: {:d}, T*: {:5.3f}: Order: {:5.3f}, Time: {:8.6f} s".format(program, nmax,nsteps,temp,order[nsteps-1],runtime))
     # Plot final frame of lattice and generate output file
-    savedat(lattice,nsteps,temp,runtime,ratio,energy,order,nmax)
+    #savedat(lattice,nsteps,temp,runtime,ratio,energy,order,nmax)
     plotdat(lattice,pflag,nmax)
 #=======================================================================
 # Main part of program, getting command line arguments and calling
