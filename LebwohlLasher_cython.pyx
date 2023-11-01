@@ -80,8 +80,8 @@ def plotdat(arr,pflag,nmax):
         norm = plt.Normalize(cols.min(), cols.max())
     elif pflag==2: # colour the arrows according to angle
         mpl.rc('image', cmap='hsv')
-        cols = arr%np.pi
-        norm = plt.Normalize(vmin=0, vmax=np.pi)
+        cols = arr%pi
+        norm = plt.Normalize(vmin=0, vmax=pi)
     else:
         mpl.rc('image', cmap='gist_gray')
         cols = np.zeros_like(arr)
@@ -130,7 +130,7 @@ def plotdat(arr,pflag,nmax):
 #         print("   {:05d}    {:6.4f} {:12.4f}  {:6.4f} ".format(i,ratio[i],energy[i],order[i]),file=FileOut)
 #     FileOut.close()
 #=======================================================================
-def one_energy(arr,ix,iy,nmax):
+cdef float one_energy(np.ndarray[double, ndim=2] arr, int ix,int iy,int nmax):
     """
     Arguments:
 	  arr (float(nmax,nmax)) = array that contains lattice data;
@@ -145,7 +145,10 @@ def one_energy(arr,ix,iy,nmax):
 	Returns:
 	  en (float) = reduced energy of cell.
     """
-    en = 0.0
+    cdef float en = 0.0
+    cdef int ixp, ixm,iyp, iym
+    cdef double ang
+
     ixp = (ix+1)%nmax # These are the coordinates
     ixm = (ix-1)%nmax # of the neighbours
     iyp = (iy+1)%nmax # with wraparound
@@ -155,13 +158,13 @@ def one_energy(arr,ix,iy,nmax):
 # to the energy
 #
     ang = arr[ix,iy]-arr[ixp,iy]
-    en += 0.5*(1.0 - 3.0*np.cos(ang)**2)
+    en += 0.5*(1.0 - 3.0*cos(ang)**2)
     ang = arr[ix,iy]-arr[ixm,iy]
-    en += 0.5*(1.0 - 3.0*np.cos(ang)**2)
+    en += 0.5*(1.0 - 3.0*cos(ang)**2)
     ang = arr[ix,iy]-arr[ix,iyp]
-    en += 0.5*(1.0 - 3.0*np.cos(ang)**2)
+    en += 0.5*(1.0 - 3.0*cos(ang)**2)
     ang = arr[ix,iy]-arr[ix,iym]
-    en += 0.5*(1.0 - 3.0*np.cos(ang)**2)
+    en += 0.5*(1.0 - 3.0*cos(ang)**2)
     return en
 #=======================================================================
 def all_energy(arr,nmax):
@@ -248,7 +251,7 @@ def MC_step(arr,Ts,nmax):
             else:
             # Now apply the Monte Carlo test - compare
             # exp( -(E_new - E_old) / T* ) >= rand(0,1)
-                boltz = np.exp( -(en1 - en0) / Ts )
+                boltz = exp( -(en1 - en0) / Ts )
 
                 if boltz >= np.random.uniform(0.0,1.0):
                     accept += 1
