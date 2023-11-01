@@ -220,7 +220,7 @@ cdef double get_order(np.ndarray[double, ndim=2] arr, int nmax):
     eigenvalues = np.linalg.eigvals(Qab)
     return np.max(eigenvalues)
 #=======================================================================
-def MC_step(arr,Ts,nmax):
+cdef float MC_step(np.ndarray[double, ndim=2] arr, float Ts, int nmax):
     """
     Arguments:
 	  arr (float(nmax,nmax)) = array that contains lattice data;
@@ -241,15 +241,22 @@ def MC_step(arr,Ts,nmax):
     # using lots of individual calls.  "scale" sets the width
     # of the distribution for the angle changes - increases
     # with temperature.
+    cdef float scale, en0, en1, boltz
+    cdef int accept, ix, iy
+
     scale=0.1+Ts
+
+
+    cdef long[:, :] xran = np.random.randint(0, high=nmax, size=(nmax, nmax))
+    cdef long[:, :] yran = np.random.randint(0, high=nmax, size=(nmax, nmax))
+    cdef double[:, :] aran = np.random.normal(scale=scale, size=(nmax, nmax))
+
     accept = 0
-    xran = np.random.randint(0,high=nmax, size=(nmax,nmax))
-    yran = np.random.randint(0,high=nmax, size=(nmax,nmax))
-    aran = np.random.normal(scale=scale, size=(nmax,nmax))
+
     for i in range(nmax):
         for j in range(nmax):
-            ix = xran[i,j]
-            iy = yran[i,j]
+            ix = <int> xran[i,j]
+            iy = <int> yran[i,j]
             ang = aran[i,j]
             en0 = one_energy(arr,ix,iy,nmax)
             arr[ix,iy] += ang
