@@ -167,7 +167,7 @@ cdef float one_energy(np.ndarray[double, ndim=2] arr, int ix,int iy,int nmax):
     en += 0.5*(1.0 - 3.0*cos(ang)**2)
     return en
 #=======================================================================
-def all_energy(arr,nmax):
+cdef float all_energy(np.ndarray[double, ndim=2] arr,int nmax):
     """
     Arguments:
 	  arr (float(nmax,nmax)) = array that contains lattice data;
@@ -178,7 +178,9 @@ def all_energy(arr,nmax):
 	Returns:
 	  enall (float) = reduced energy of lattice.
     """
-    enall = 0.0
+    cdef float enall = 0.0
+    cdef int i,j
+
     for i in range(nmax):
         for j in range(nmax):
             enall += one_energy(arr,i,j,nmax)
