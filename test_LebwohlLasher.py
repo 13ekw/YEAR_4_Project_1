@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from LebwohlLasher import *
+from LebwohlLasher_NumPy_Vectorised import *
 
 @pytest.mark.parametrize("nmax", [1, 5, 10, 25, 100])  # Test with different nmax values
 def test_initdat(nmax):
