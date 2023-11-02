@@ -4,7 +4,7 @@
 #SBATCH --partition=veryshort
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --cpus-per-task=8
+#SBATCH --cpus-per-task=2
 #SBATCH --time=6:0:0
 #SBATCH --mem-per-cpu=100M
 #SBATCH --account=PHYS030544
@@ -30,17 +30,16 @@ printf "\n\n"
 start_time=$(date +%s)
 
 # File run
-#python LebwohlLasher.py 50 50 0.5 0
-python -m cProfile LebwohlLasher.py 50 50 0.5 0 > prof1.txt
-python -m cProfile LebwohlLasher.py 50 50 0.5 0 > prof2.txt
-python -m cProfile LebwohlLasher.py 50 50 0.5 0 > prof3.txt
-python -m cProfile LebwohlLasher.py 50 50 0.5 0 > prof4.txt
-python -m cProfile LebwohlLasher.py 50 50 0.5 0 > prof5.txt
-python -m cProfile LebwohlLasher.py 50 50 0.5 0 > prof6.txt
-python -m cProfile LebwohlLasher.py 50 50 0.5 0 > prof7.txt
-python -m cProfile LebwohlLasher.py 50 50 0.5 0 > prof8.txt
-python -m cProfile LebwohlLasher.py 50 50 0.5 0 > prof9.txt
-python -m cProfile LebwohlLasher.py 50 50 0.5 0 > prof10.txt
+python -m cProfile LebwohlLasher_Numba_cache_parallel.py 50 50 0.5 0 > prof1_Numba_cache_parallel_2.txt
+python -m cProfile LebwohlLasher_Numba_cache_parallel.py 50 50 0.5 0 > prof2_Numba_cache_parallel_2.txt
+python -m cProfile LebwohlLasher_Numba_cache_parallel.py 50 50 0.5 0 > prof3_Numba_cache_parallel_2.txt
+python -m cProfile LebwohlLasher_Numba_cache_parallel.py 50 50 0.5 0 > prof4_Numba_cache_parallel_2.txt
+python -m cProfile LebwohlLasher_Numba_cache_parallel.py 50 50 0.5 0 > prof5_Numba_cache_parallel_2.txt
+python -m cProfile LebwohlLasher_Numba_cache_parallel.py 50 50 0.5 0 > prof6_Numba_cache_parallel_2.txt
+python -m cProfile LebwohlLasher_Numba_cache_parallel.py 50 50 0.5 0 > prof7_Numba_cache_parallel_2.txt
+python -m cProfile LebwohlLasher_Numba_cache_parallel.py 50 50 0.5 0 > prof8_Numba_cache_parallel_2.txt
+python -m cProfile LebwohlLasher_Numba_cache_parallel.py 50 50 0.5 0 > prof9_Numba_cache_parallel_2.txt
+python -m cProfile LebwohlLasher_Numba_cache_parallel.py 50 50 0.5 0 > prof10_Numba_cache_parallel_2.txt
 
 # End recording the end time
 end_time=$(date +%s)
