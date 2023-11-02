@@ -198,9 +198,9 @@ def get_order(arr,nmax):
     # Generate a 3D unit vector for each cell (i,j) and
     # put it in a (3,i,j) array.
     #
-    lab = np.stack((np.cos(arr),np.sin(arr),np.zeros_like(arr)), axis = 0)
-    Qab = (3 * np.einsum('aij, bij -> ab', lab, lab) - delta) / (2 * nmax * nmax)
-    eigenvalues,eigenvectors = np.linalg.eig(Qab)
+    lab = np.vstack((np.cos(arr),np.sin(arr),np.zeros_like(arr))).reshape(3,nmax,nmax)
+    Qab = (np.einsum('aij, bij -> ab', lab, lab) - delta) / (2.0 * nmax * nmax)
+    eigenvalues = np.linalg.eigvals(Qab)
     return eigenvalues.max()
 #=======================================================================
 def MC_step(arr,Ts,nmax):
@@ -284,7 +284,7 @@ def main(program, nsteps, nmax, temp, pflag):
     # Final outputs
     print("{}: Size: {:d}, Steps: {:d}, T*: {:5.3f}: Order: {:5.3f}, Time: {:8.6f} s".format(program, nmax,nsteps,temp,order[nsteps-1],runtime))
     # Plot final frame of lattice and generate output file
-    savedat(lattice,nsteps,temp,runtime,ratio,energy,order,nmax)
+    #savedat(lattice,nsteps,temp,runtime,ratio,energy,order,nmax)
     plotdat(lattice,pflag,nmax)
 #=======================================================================
 # Main part of program, getting command line arguments and calling

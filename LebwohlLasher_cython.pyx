@@ -43,7 +43,7 @@ cdef np.ndarray initdat(int nmax):
 	Returns:
 	  arr (float(nmax,nmax)) = array to hold lattice.
     """
-    cdef np.ndarray[double, ndim=2] arr = np.random.random_sample((nmax,nmax))*2.0*np.pi
+    cdef np.ndarray[double, ndim=2] arr = np.random.random_sample((nmax,nmax))*2.0*pi
     return arr
 #=======================================================================
 def plotdat(arr,pflag,nmax):
