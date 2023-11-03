@@ -4,13 +4,13 @@
 #SBATCH --partition=teach_cpu
 #SBATCH --nodes=2
 #SBATCH --ntasks-per-node=1
-#SBATCH --cpus-per-task=28
+#SBATCH --cpus-per-task=8
 #SBATCH --time=0:0:10
 #SBATCH --mem-per-cpu=100M
 #SBATCH --account=PHYS030544
 
 # Load anaconda environment
-module add languages/anaconda3/2022.11-3.9.13
+module add languages/anaconda3/2020-3.8.5
 module load languages/intel/2020-u4
 
 # Change to working directory, where job was submitted from
@@ -30,7 +30,7 @@ printf "\n\n"
 # Recording start time
 start_time=$(date +%s)
 
-mpiexec -n 4 python LebwohlLasher_mpi4py_2.py 50 50 0.5 0
+mpiexec -n 4 python -m cProfile LebwohlLasher_mpi4py.py 50 50 0.5 0
 
 # Calculate and print the runtime
 runtime=$((end_time - start_time))
