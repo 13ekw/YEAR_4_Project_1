@@ -31,6 +31,7 @@ import matplotlib as mpl
 from numba import jit, prange
 
 #=======================================================================
+@jit(nopython=True, cache = True)
 def initdat(nmax):
     """
     Arguments:
@@ -211,7 +212,7 @@ def get_order(arr,nmax):
                 for j in prange(nmax):
                     Qab[a,b] += 3*lab[a,i,j]*lab[b,i,j] - delta[a,b]
     Qab = Qab/(2*nmax*nmax)
-    eigenvalues,eigenvectors = np.linalg.eig(Qab)
+    eigenvalues = np.linalg.eigvals(Qab)
     return eigenvalues.max()
 #=======================================================================
 
@@ -237,11 +238,9 @@ def MC_step(arr,Ts,nmax,aran):
     # using lots of individual calls.  "scale" sets the width
     # of the distribution for the angle changes - increases
     # with temperature.
-    scale=0.1+Ts
     accept = 0
     xran = np.random.randint(0,high=nmax, size=(nmax,nmax))
     yran = np.random.randint(0,high=nmax, size=(nmax,nmax))
-    #aran = np.random.normal(scale=scale, size=(nmax,nmax))
     for i in prange(nmax):
         for j in prange(nmax):
             ix = xran[i,j]
@@ -292,8 +291,7 @@ def main(program, nsteps, nmax, temp, pflag):
     # Begin doing and timing some MC steps.
     initial = time.time()
     for it in range(1,nsteps+1): 
-        scale=0.1+temp
-        aran = np.random.normal(scale=scale, size=(nmax,nmax))
+        aran = np.random.normal(scale=0.1+temp, size=(nmax,nmax))
         ratio[it] = MC_step(lattice,temp,nmax, aran)
         energy[it] = all_energy(lattice,nmax)
         order[it] = get_order(lattice,nmax)

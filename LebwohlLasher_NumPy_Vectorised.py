@@ -199,8 +199,13 @@ def get_order(arr,nmax):
     # put it in a (3,i,j) array.
     #
     lab = np.vstack((np.cos(arr),np.sin(arr),np.zeros_like(arr))).reshape(3,nmax,nmax)
-    Qab = (np.einsum('aij, bij -> ab', lab, lab) - delta) / (2.0 * nmax * nmax)
-    eigenvalues = np.linalg.eigvals(Qab)
+    for a in range(3):
+        for b in range(3):
+            for i in range(nmax):
+                for j in range(nmax):
+                    Qab[a,b] += 3*lab[a,i,j]*lab[b,i,j] - delta[a,b]
+    Qab = Qab/(2*nmax*nmax)
+    eigenvalues,eigenvectors = np.linalg.eig(Qab)
     return eigenvalues.max()
 #=======================================================================
 def MC_step(arr,Ts,nmax):
@@ -229,21 +234,25 @@ def MC_step(arr,Ts,nmax):
     xran = np.random.randint(0,high=nmax, size=(nmax,nmax))
     yran = np.random.randint(0,high=nmax, size=(nmax,nmax))
     aran = np.random.normal(scale=scale, size=(nmax,nmax))
-    
-    ix = xran
-    iy = yran
-    ang = aran
-    en0 = one_energy(arr,ix,iy,nmax)
-    arr[ix,iy] += ang
-    en1 = one_energy(arr,ix,iy,nmax)
+    for i in range(nmax):
+        for j in range(nmax):
+            ix = xran[i,j]
+            iy = yran[i,j]
+            ang = aran[i,j]
+            en0 = one_energy(arr,ix,iy,nmax)
+            arr[ix,iy] += ang
+            en1 = one_energy(arr,ix,iy,nmax)
+            if en1<=en0:
+                accept += 1
+            else:
+            # Now apply the Monte Carlo test - compare
+            # exp( -(E_new - E_old) / T* ) >= rand(0,1)
+                boltz = np.exp( -(en1 - en0) / Ts )
 
-    accept_mask = en1<=en0
-            
-    # Now apply the Monte Carlo test - compare
-    # exp( -(E_new - E_old) / T* ) >= rand(0,1)
-    boltz = np.exp( -(en1 - en0) / Ts )
-    rand = np.random.uniform(0.0,1.0, size = (nmax, nmax))
-    accept = np.sum(accept_mask | (boltz >= rand))
+                if boltz >= np.random.uniform(0.0,1.0):
+                    accept += 1
+                else:
+                    arr[ix,iy] -= ang
     return accept/(nmax*nmax)
 #=======================================================================
 def main(program, nsteps, nmax, temp, pflag):
@@ -284,7 +293,7 @@ def main(program, nsteps, nmax, temp, pflag):
     # Final outputs
     print("{}: Size: {:d}, Steps: {:d}, T*: {:5.3f}: Order: {:5.3f}, Time: {:8.6f} s".format(program, nmax,nsteps,temp,order[nsteps-1],runtime))
     # Plot final frame of lattice and generate output file
-    #savedat(lattice,nsteps,temp,runtime,ratio,energy,order,nmax)
+    savedat(lattice,nsteps,temp,runtime,ratio,energy,order,nmax)
     plotdat(lattice,pflag,nmax)
 #=======================================================================
 # Main part of program, getting command line arguments and calling

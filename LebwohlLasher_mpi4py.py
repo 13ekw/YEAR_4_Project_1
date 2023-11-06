@@ -30,6 +30,11 @@ import numpy as np
 #import matplotlib as mpl
 from mpi4py import MPI
 
+#define mpi fucntions
+comm = MPI.COMM_WORLD
+rank = comm.Get_rank()
+size = comm.Get_size()
+
 #=======================================================================
 def initdat(nmax):
     """
@@ -235,11 +240,6 @@ def MC_step(arr,Ts,nmax):
     yran = np.random.randint(0,high=nmax, size=(nmax,nmax))
     aran = np.random.normal(scale=scale, size=(nmax,nmax))
 
-    #define mpi communicator and rank
-    comm = MPI.COMM_WORLD
-    rank = comm.Get_rank()
-    size = comm.Get_size()
-
     #split task into chunks for each thread
     chunk = nmax // size
     start_of_chunk = rank * chunk
@@ -268,6 +268,7 @@ def MC_step(arr,Ts,nmax):
     
     #sum solutions from each thread
     tot_accept = comm.allreduce(part_accept, op=MPI.SUM)
+
     return tot_accept/(nmax*nmax)
 #=======================================================================
 def main(program, nsteps, nmax, temp, pflag):
@@ -283,10 +284,6 @@ def main(program, nsteps, nmax, temp, pflag):
     Returns:
       NULL
     """
-    #define mpi fucntions
-    comm = MPI.COMM_WORLD
-    rank = comm.Get_rank
-    size = comm.Get_size
 
     #MAIN WORKER
     if (rank == 0):
